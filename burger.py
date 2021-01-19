@@ -6,6 +6,9 @@ def gaussian(x):
     #initial condition u(x, 0) = f(x)
     return np.exp(-x**2)
 
+def f(x):
+    return np.piecewise(x, [x < 0, x >= 0], [1, 0])
+
 
 def main(f, left, right):
     x = np.linspace(left, right)
@@ -27,17 +30,14 @@ def main(f, left, right):
     ax1.plot(x, f(x))
 
     num_lines = 20
-    step = (right - left) / num_lines
-    print("stepsize = " + str(step))
+    x_lines = np.linspace(left, right, num_lines)
     
-    x_0 = left
-    while x_0 < right:
+    for x_0 in x_lines:
         if f(x_0) == 0:
             ax2.axvline(x_0)
         else:
             ax2.plot(x, (x-x_0)/f(x_0), 'b', label = 'r')
-        x_0 += step
     
-main(gaussian, -2, 2)
+main(f, -2, 2)
 plt.show()
 
