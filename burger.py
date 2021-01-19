@@ -9,6 +9,13 @@ def gaussian(x):
 def f(x):
     return np.piecewise(x, [x < 0, x >= 0], [1, 0])
 
+def intersection(f, x_1, x_2):
+    '''Returns x-coordinate of intersection between two characteristic lines, with slope = 1 / f(x).'''
+    if f(x_1) == f(x_2):
+        return None
+    if (x_1 < x_2 and f(x_1) < f(x_2)) or (x_1 > x_2 and f(x_1) > f(x_2)):
+        return None
+    return (x_1 - f(x_1)*(x_2)) / (f(x_2) - f(x_1))
 
 def main(f, left, right):
     x = np.linspace(left, right)
@@ -38,6 +45,7 @@ def main(f, left, right):
         else:
             ax2.plot(x, (x-x_0)/f(x_0), 'b', label = 'r')
     
-main(f, -2, 2)
-plt.show()
+#main(f, -2, 2)
+#plt.show()
 
+print(intersection(f, -1, 1))
