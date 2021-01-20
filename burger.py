@@ -48,7 +48,7 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-    num_lines = 100
+    num_lines = 25
     x_lines = np.linspace(left, right, num_lines)
 
 
@@ -69,4 +69,5 @@ def main(f, left, right):
     
 main(f, -2, 2)
 plt.show()
-print("hi")
+main(gaussian, -2, 2)
+plt.show()
