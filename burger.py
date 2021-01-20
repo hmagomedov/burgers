@@ -6,26 +6,43 @@ def gaussian(x):
     #initial condition u(x, 0) = f(x)
     return np.exp(-x**2)
 
+
 def f(x):
     return np.piecewise(x, [x < 0, x >= 0], [1, 0])
 
+
+def lineEqn(f, x_0, x):
+    '''Slope = 1 / f(x_0).'''
+    if f(x_0) == 0:
+        return None
+    return (x - x_0)/f(x_0)
+
+
 def intersection(f, x_1, x_2):
-    '''Returns x-coordinate of intersection between two characteristic lines, with slope = 1 / f(x).'''
-    if f(x_1) == f(x_2):
+    '''Returns (x, t)-coordinates of intersection between two characteristic lines.'''
+    if x_1 > x_2:
+        #ensure x_1 < x_2
+        x_1, x_2 = x_2, x_1
+    if f(x_1) <= f(x_2):
         return None
-    if (x_1 < x_2 and f(x_1) < f(x_2)) or (x_1 > x_2 and f(x_1) > f(x_2)):
-        return None
-    return (x_1 - f(x_1)*(x_2)) / (f(x_2) - f(x_1))
+
+    x_inter = (x_2 * f(x_1) - x_1 * f(x_2)) / (f(x_1) - f(x_2))
+    #print("x_1 = " + str(x_1) + ", x_2 = " + str(x_2) + ", inter = " + str(x_inter))
+    t_inter = lineEqn(f, x_1, x_inter)
+    if t_inter is None:
+        t_inter = lineEqn(f, x_2, x_inter)
+    return [x_inter, t_inter]
+
 
 def main(f, left, right):
-    x = np.linspace(left, right)
-
+    x_space = np.linspace(left, right)
     fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
+
     ax1.set_title("Initial Condition (t = 0)")
     ax1.set_xlabel("x", weight = 'bold')
     ax1.set_ylabel("u(x, 0)", weight = 'bold')
     ax1.set_xlim([left, right])
-
+    ax1.plot(x_space, f(x_space), 'b')
 
     ax2.set_title("Characteristic Lines in Space-Time")
     ax2.set_xlabel("x", weight = 'bold')
@@ -33,19 +50,24 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-
-    ax1.plot(x, f(x))
-
-    num_lines = 20
+    num_lines = 10
     x_lines = np.linspace(left, right, num_lines)
-    
     for x_0 in x_lines:
         if f(x_0) == 0:
+            #vertical characteristic
             ax2.axvline(x_0)
         else:
-            ax2.plot(x, (x-x_0)/f(x_0), 'b', label = 'r')
-    
-#main(f, -2, 2)
-#plt.show()
+            t = lineEqn(f, x_0, x_space)
+            ax2.plot(x_space, t, 'tab:blue')
 
-print(intersection(f, -1, 1))
+    for x_0 in x_lines:
+        for x_i in x_lines:
+            shock = intersection(f, x_0, x_i)
+            if shock is not None:
+                [x_shock, t_shock] = shock
+                #print([x_shock, t_shock])
+                ax2.plot(x_shock, t_shock, 'r+')
+                
+    
+main(f, -2, 2)
+plt.show()
