@@ -25,9 +25,7 @@ def intersection(f, x_1, x_2):
         x_1, x_2 = x_2, x_1
     if f(x_1) <= f(x_2):
         return None
-
     x_inter = (x_2 * f(x_1) - x_1 * f(x_2)) / (f(x_1) - f(x_2))
-    #print("x_1 = " + str(x_1) + ", x_2 = " + str(x_2) + ", inter = " + str(x_inter))
     t_inter = lineEqn(f, x_1, x_inter)
     if t_inter is None:
         t_inter = lineEqn(f, x_2, x_inter)
@@ -50,24 +48,25 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-    num_lines = 10
+    num_lines = 100
     x_lines = np.linspace(left, right, num_lines)
-    for x_0 in x_lines:
+
+
+    for i in range(num_lines):
+        x_0 = x_lines[i]
         if f(x_0) == 0:
             #vertical characteristic
-            ax2.axvline(x_0)
+            ax2.axvline(x_0, zorder = 1)
         else:
             t = lineEqn(f, x_0, x_space)
-            ax2.plot(x_space, t, 'tab:blue')
+            ax2.plot(x_space, t, 'tab:blue', zorder = 1)
 
-    for x_0 in x_lines:
-        for x_i in x_lines:
-            shock = intersection(f, x_0, x_i)
-            if shock is not None:
+        for x_j in x_lines[i+1:]:
+            shock = intersection(f, x_0, x_j)
+            if shock:
                 [x_shock, t_shock] = shock
-                #print([x_shock, t_shock])
-                ax2.plot(x_shock, t_shock, 'r+')
-                
+                ax2.plot(x_shock, t_shock, 'r+', zorder = 2)
     
 main(f, -2, 2)
 plt.show()
+print("hi")
