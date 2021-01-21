@@ -48,14 +48,70 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-    num_lines = 25
+    num_lines = 20
     x_lines = np.linspace(left, right, num_lines)
 
+    collisions = []
+    shocks = []
+    for i in range(num_lines):
+        x_0 = x_lines[i]
+        num_collisions = 0
+        for x_j in x_lines[i+1:]:
+            collision = intersection(f, x_0, x_j)
+            if collision:
+                collisions.append([x_0, x_j] + collision)
+                num_collisions += 1
+        if num_collisions == 0:
+            #bad logic, fix
+            if f(x_0) == 0:
+                #vertical characteristic 
+                #ax2.axvline(x_0, zorder = 1)
+                pass
+            else:
+                t = lineEqn(f, x_0, x_space)
+                ax2.plot(x_space, t, 'tab:blue', zorder = 1)
 
+    collisions.sort(key = lambda _: _[3])   #sort by time of collision  
+    print(collisions)
+    seen = []
+    while collisions: 
+        [x_1, x_2, x_shock, t_shock] = collisions[0]
+        if x_1 not in seen and x_2 not in seen:
+            ax2.plot(x_shock, t_shock, 'r+', zorder = 2)
+            
+            #plot first characteristic from (x_1, 0) to (x_shock, t_shock)
+            if f(x_1) == 0:
+                ax2.axvline(x_1, ymax = t_shock / (right-left), zorder = 1)
+            else:
+                if x_1 < x_shock:
+                    x_smooth = np.linspace(x_1, x_shock)
+                else:
+                    x_smooth = np.linspace(x_shock, x_1)
+                t_smooth = lineEqn(f, x_1, x_smooth)
+                ax2.plot(x_smooth, t_smooth, 'tab:blue', zorder = 1)
+
+            #plot second characteristic from (x_2, 0) to (x_shock, t_shock)
+            if f(x_2) == 0:
+                ax2.axvline(x_2, ymax = t_shock / (right-left), zorder = 1)
+            else:
+                if x_2 < x_shock:
+                    x_smooth = np.linspace(x_2, x_shock)
+                else:
+                    x_smooth = np.linspace(x_shock, x_2)
+                t_smooth = lineEqn(f, x_2, x_smooth)
+                ax2.plot(x_smooth, t_smooth, 'tab:blue', zorder = 1)
+
+            seen.extend([x_1, x_2])
+        collisions = collisions[1:]
+    print("hi")   
+                
+            
+    print(collisions)
+
+    '''
     for i in range(num_lines):
         x_0 = x_lines[i]
         if f(x_0) == 0:
-            #vertical characteristic
             ax2.axvline(x_0, zorder = 1)
         else:
             t = lineEqn(f, x_0, x_space)
@@ -66,6 +122,7 @@ def main(f, left, right):
             if shock:
                 [x_shock, t_shock] = shock
                 ax2.plot(x_shock, t_shock, 'r+', zorder = 2)
+    '''
     
 main(f, -2, 2)
 plt.show()
