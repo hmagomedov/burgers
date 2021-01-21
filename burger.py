@@ -6,9 +6,14 @@ def gaussian(x):
     #initial condition u(x, 0) = f(x)
     return np.exp(-x**2)
 
-
 def f(x):
     return np.piecewise(x, [x < 0, x >= 0], [1, 0])
+    
+def g(x):
+    if x < 0:
+        return 0
+    else:
+        return 1
 
 
 def lineEqn(f, x_0, x):
@@ -32,8 +37,8 @@ def intersection(f, x_1, x_2):
     return [x_inter, t_inter]
 
 
-def main(f, left, right):
-    x_space = np.linspace(left, right)
+def main(f, left, right, t_max, num_lines):
+    x_space = np.linspace(left, right, num = 10*(right-left))
     fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
 
     ax1.set_title("Initial Condition (t = 0)")
@@ -46,9 +51,8 @@ def main(f, left, right):
     ax2.set_xlabel("x", weight = 'bold')
     ax2.set_ylabel("t", weight = 'bold')
     ax2.set_xlim([left, right])
-    ax2.set_ylim([0, right-left])
+    ax2.set_ylim([0, t_max])
 
-    num_lines = 21
     x_lines = np.linspace(left, right, num_lines)
 
     collisions = []
@@ -61,14 +65,16 @@ def main(f, left, right):
 
     collisions.sort(key = lambda _: _[3])   #sort by time of collision  
     seen = []
+    shocks = []
     while collisions: 
         [x_1, x_2, x_shock, t_shock] = collisions[0]
         if x_1 not in seen and x_2 not in seen:
+            shocks.append([x_shock, t_shock])
             ax2.plot(x_shock, t_shock, 'r+', zorder = 2)
-            
+
             #plot first characteristic from (x_1, 0) to (x_shock, t_shock)
             if f(x_1) == 0:
-                ax2.axvline(x_1, ymax = t_shock / (right-left), zorder = 1)
+                ax2.axvline(x_1, ymax = t_shock / t_max, zorder = 1)
             else:
                 if x_1 < x_shock:
                     x_smooth = np.linspace(x_1, x_shock)
@@ -79,7 +85,7 @@ def main(f, left, right):
 
             #plot second characteristic from (x_2, 0) to (x_shock, t_shock)
             if f(x_2) == 0:
-                ax2.axvline(x_2, ymax = t_shock / (right-left), zorder = 1)
+                ax2.axvline(x_2, ymax = t_shock / t_max, zorder = 1)
             else:
                 if x_2 < x_shock:
                     x_smooth = np.linspace(x_2, x_shock)
@@ -97,8 +103,19 @@ def main(f, left, right):
             else:
                 t = lineEqn(f, x_0, x_space)
                 ax2.plot(x_space, t, 'tab:blue', zorder = 1)
-    
-main(f, -2, 2)
+
+    #shock-front interpolation
+    if len(shocks) > 1:
+        shocks.sort(key = lambda _: _[0])
+        shocks = np.asarray(shocks)
+        shock_x_space = np.linspace(shocks[0][0], shocks[-1][0])
+        ax2.plot(shock_x_space, np.interp(shock_x_space, shocks[:, 0], shocks[:, 1]), color = 'red')
+
+    print("Characteristics: " + str(num_lines))
+    print("Collisions: " + str(len(shocks)))
+    return shocks
+
+main(f, -5, 5, 10, 21)
 plt.show()
-main(gaussian, -2, 2)
+main(gaussian, -5, 5, 10, 21)
 plt.show()
