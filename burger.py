@@ -48,31 +48,24 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-    num_lines = 20
+    num_lines = 50
     x_lines = np.linspace(left, right, num_lines)
 
     collisions = []
-    shocks = []
+    no_collisions = x_lines.tolist()
     for i in range(num_lines):
         x_0 = x_lines[i]
-        num_collisions = 0
         for x_j in x_lines[i+1:]:
             collision = intersection(f, x_0, x_j)
             if collision:
                 collisions.append([x_0, x_j] + collision)
-                num_collisions += 1
-        if num_collisions == 0:
-            #bad logic, fix
-            if f(x_0) == 0:
-                #vertical characteristic 
-                #ax2.axvline(x_0, zorder = 1)
-                pass
-            else:
-                t = lineEqn(f, x_0, x_space)
-                ax2.plot(x_space, t, 'tab:blue', zorder = 1)
-
+                #very janky 
+                if x_0 in no_collisions:
+                    no_collisions.remove(x_0)
+                if x_j in no_collisions:
+                    no_collisions.remove(x_j)
     collisions.sort(key = lambda _: _[3])   #sort by time of collision  
-    print(collisions)
+
     seen = []
     while collisions: 
         [x_1, x_2, x_shock, t_shock] = collisions[0]
@@ -103,11 +96,14 @@ def main(f, left, right):
 
             seen.extend([x_1, x_2])
         collisions = collisions[1:]
-    print("hi")   
-                
-            
-    print(collisions)
 
+    print(no_collisions)
+    for x_0 in no_collisions:
+        if f(x_0) == 0:
+            ax2.axvline(x_0, zorder = 1)
+        else:
+            t = lineEqn(f, x_0, x_space)
+            ax2.plot(x_space, t, 'tab:blue', zorder = 1)
     '''
     for i in range(num_lines):
         x_0 = x_lines[i]
