@@ -34,10 +34,17 @@ def intersection(f, x_1, x_2):
     t_inter = lineEqn(f, x_1, x_inter)
     if t_inter is None:
         t_inter = lineEqn(f, x_2, x_inter)
-    return [x_inter, t_inter]
+    return [x_inter, t_inter]    
 
+def fwd_propagate(f, x_space, t):
+    u_0 = f(x_space)
+    new_x_space = np.zeros(len(x_space))
+    for i in range(len(x_space)):
+        x_i = x_space[i]
+        new_x_space[i] = t * f(x_i) + x_i
+    return new_x_space
 
-def main(f, left, right, t_max, num_lines):
+def main(f, left = -2, right = 2, t_max = 4, num_lines = 21):
     x_space = np.linspace(left, right, num = 10*(right-left))
     fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
 
@@ -110,12 +117,16 @@ def main(f, left, right, t_max, num_lines):
         shocks = np.asarray(shocks)
         shock_x_space = np.linspace(shocks[0][0], shocks[-1][0])
         ax2.plot(shock_x_space, np.interp(shock_x_space, shocks[:, 0], shocks[:, 1]), color = 'red')
+    
+    #forward propagate initial condition until first shock
+    t_shock = shocks[0][0]
+    print("t_shock = " + str(t_shock))
+    x_space_t = fwd_propagate(f, x_space, t_shock)
+    ax1.plot(x_space_t, f(x_space), 'red')
 
-    print("Characteristics: " + str(num_lines))
-    print("Collisions: " + str(len(shocks)))
-    return shocks
+    #todo: animation
 
-main(f, -5, 5, 10, 21)
+main(f, -5, 5, 10, 51)
 plt.show()
-main(gaussian, -5, 5, 10, 21)
+main(gaussian, -5, 5, 10, 51)
 plt.show()
