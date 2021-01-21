@@ -48,24 +48,18 @@ def main(f, left, right):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, right-left])
 
-    num_lines = 50
+    num_lines = 21
     x_lines = np.linspace(left, right, num_lines)
 
     collisions = []
-    no_collisions = x_lines.tolist()
     for i in range(num_lines):
         x_0 = x_lines[i]
         for x_j in x_lines[i+1:]:
             collision = intersection(f, x_0, x_j)
             if collision:
                 collisions.append([x_0, x_j] + collision)
-                #very janky 
-                if x_0 in no_collisions:
-                    no_collisions.remove(x_0)
-                if x_j in no_collisions:
-                    no_collisions.remove(x_j)
-    collisions.sort(key = lambda _: _[3])   #sort by time of collision  
 
+    collisions.sort(key = lambda _: _[3])   #sort by time of collision  
     seen = []
     while collisions: 
         [x_1, x_2, x_shock, t_shock] = collisions[0]
@@ -93,32 +87,16 @@ def main(f, left, right):
                     x_smooth = np.linspace(x_shock, x_2)
                 t_smooth = lineEqn(f, x_2, x_smooth)
                 ax2.plot(x_smooth, t_smooth, 'tab:blue', zorder = 1)
-
             seen.extend([x_1, x_2])
         collisions = collisions[1:]
 
-    print(no_collisions)
-    for x_0 in no_collisions:
-        if f(x_0) == 0:
-            ax2.axvline(x_0, zorder = 1)
-        else:
-            t = lineEqn(f, x_0, x_space)
-            ax2.plot(x_space, t, 'tab:blue', zorder = 1)
-    '''
-    for i in range(num_lines):
-        x_0 = x_lines[i]
-        if f(x_0) == 0:
-            ax2.axvline(x_0, zorder = 1)
-        else:
-            t = lineEqn(f, x_0, x_space)
-            ax2.plot(x_space, t, 'tab:blue', zorder = 1)
-
-        for x_j in x_lines[i+1:]:
-            shock = intersection(f, x_0, x_j)
-            if shock:
-                [x_shock, t_shock] = shock
-                ax2.plot(x_shock, t_shock, 'r+', zorder = 2)
-    '''
+    for x_0 in x_lines:
+        if x_0 not in seen:
+            if f(x_0) == 0:
+                ax2.axvline(x_0, zorder = 1)
+            else:
+                t = lineEqn(f, x_0, x_space)
+                ax2.plot(x_space, t, 'tab:blue', zorder = 1)
     
 main(f, -2, 2)
 plt.show()
