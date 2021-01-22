@@ -7,7 +7,7 @@ def gaussian(x):
     return np.exp(-x**2)
 
 def f(x):
-    return np.piecewise(x, [x < 0, x >= 0], [1, 0])
+    return np.piecewise(x, [x < 0, x >= 0], [1, 0.5])
     
 def g(x):
     if x < 0:
@@ -48,7 +48,7 @@ def fwd_propagate(f, x_space, t):
 
 def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
     x_space = np.linspace(left, right, 100)
-    fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, constrained_layout = True)
 
     ax1.set_title("Initial Condition (t = 0)")
     ax1.set_xlabel("x", weight = 'bold')
@@ -125,7 +125,11 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
     
         #forward propagate initial condition until first shock
         x_space_t = fwd_propagate(f, x_space, t_shock)
-        ax1.plot(x_space_t, f(x_space), 'red')
+        ax3.set_title("Shock Discontinuity (t = " + str(round(t_shock, 2)) + ")")
+        ax3.set_xlabel("x", weight = 'bold')
+        ax3.set_ylabel("u(x, t)", weight = 'bold')
+        ax3.set_xlim([left, right])
+        ax3.plot(x_space_t, f(x_space), 'red')
 
         #todo: animation
     plt.show()
