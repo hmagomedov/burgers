@@ -15,6 +15,8 @@ def g(x):
     else:
         return 1
 
+def h(x):
+    return np.tanh(-x)
 
 def lineEqn(f, x_0, x):
     '''Slope = 1 / f(x_0).'''
@@ -44,8 +46,8 @@ def fwd_propagate(f, x_space, t):
         new_x_space[i] = t * f(x_i) + x_i
     return new_x_space
 
-def main(f, left = -2, right = 2, t_max = 4, num_lines = 21):
-    x_space = np.linspace(left, right, num = 10*(right-left))
+def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
+    x_space = np.linspace(left, right, 100)
     fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
 
     ax1.set_title("Initial Condition (t = 0)")
@@ -110,23 +112,25 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 21):
             else:
                 t = lineEqn(f, x_0, x_space)
                 ax2.plot(x_space, t, 'tab:blue', zorder = 1)
-
-    #shock-front interpolation
+    
     if len(shocks) > 1:
+        t_shock = shocks[0][1]
+        print("t_shock = " + str(t_shock))
+
+        #shock-front interpolation
         shocks.sort(key = lambda _: _[0])
         shocks = np.asarray(shocks)
         shock_x_space = np.linspace(shocks[0][0], shocks[-1][0])
         ax2.plot(shock_x_space, np.interp(shock_x_space, shocks[:, 0], shocks[:, 1]), color = 'red')
     
-    #forward propagate initial condition until first shock
-    t_shock = shocks[0][0]
-    print("t_shock = " + str(t_shock))
-    x_space_t = fwd_propagate(f, x_space, t_shock)
-    ax1.plot(x_space_t, f(x_space), 'red')
+        #forward propagate initial condition until first shock
+        x_space_t = fwd_propagate(f, x_space, t_shock)
+        ax1.plot(x_space_t, f(x_space), 'red')
 
-    #todo: animation
+        #todo: animation
+    plt.show()
 
-main(f, -5, 5, 10, 51)
-plt.show()
-main(gaussian, -5, 5, 10, 51)
-plt.show()
+main(f)
+main(gaussian, -4, 4, 10)
+main(np.sin, 0, 2*np.pi, 4)
+main(h, -4, 4)
