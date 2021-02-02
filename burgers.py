@@ -2,24 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def gaussian(x):
-    #initial condition u(x, 0) = f(x)
-    return np.exp(-x**2)
-
-def f(x):
-    return np.piecewise(x, [x < 0, x >= 0], [1, 0.5])
-    
-def g(x):
-    if x < 0:
-        return 0
-    else:
-        return 1
-
-def h(x):
-    return np.tanh(-x)
-
-def lineEqn(f, x_0, x):
-    '''Slope = 1 / f(x_0).'''
+def line_eqn(f, x_0, x):
+    '''Equation of characteristic line in (x, t)-space, with slope = 1 / f(x_0).'''
     if f(x_0) == 0:
         return None
     return (x - x_0)/f(x_0)
@@ -33,12 +17,13 @@ def intersection(f, x_1, x_2):
     if f(x_1) <= f(x_2):
         return None
     x_inter = (x_2 * f(x_1) - x_1 * f(x_2)) / (f(x_1) - f(x_2))
-    t_inter = lineEqn(f, x_1, x_inter)
+    t_inter = line_eqn(f, x_1, x_inter)
     if t_inter is None:
-        t_inter = lineEqn(f, x_2, x_inter)
+        t_inter = line_eqn(f, x_2, x_inter)
     return [x_inter, t_inter]    
 
 def fwd_propagate(f, x_space, t):
+    '''Moves f(x_space) along characteristic lines until time t'''
     u_0 = f(x_space)
     new_x_space = np.zeros(len(x_space))
     for i in range(len(x_space)):
@@ -46,9 +31,14 @@ def fwd_propagate(f, x_space, t):
         new_x_space[i] = t * f(x_i) + x_i
     return new_x_space
 
-def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
-    x_space = np.linspace(left, right, 100)
-    fig, (ax1, ax2, ax3) = plt.subplots(3, constrained_layout = True)
+def burgers(f, left = -2, right = 2, t_max = 4, numLines = 40, plotShockSol = True):
+    x_space = np.linspace(left, right, 1000)
+    if plotShockSol:
+        fig, (ax1, ax2, ax3) = plt.subplots(3, constrained_layout = True)
+        fig.set_size_inches(6, 6)
+    else: 
+        fig, (ax1, ax2) = plt.subplots(2, constrained_layout = True)
+        fig.set_size_inches(6, 9)
 
     ax1.set_title("Initial Condition (t = 0)")
     ax1.set_xlabel("x", weight = 'bold')
@@ -62,10 +52,10 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
     ax2.set_xlim([left, right])
     ax2.set_ylim([0, t_max])
 
-    x_lines = np.linspace(left, right, num_lines)
+    x_lines = np.linspace(left, right, numLines)
 
     collisions = []
-    for i in range(num_lines):
+    for i in range(numLines):
         x_0 = x_lines[i]
         for x_j in x_lines[i+1:]:
             collision = intersection(f, x_0, x_j)
@@ -89,7 +79,7 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
                     x_smooth = np.linspace(x_1, x_shock)
                 else:
                     x_smooth = np.linspace(x_shock, x_1)
-                t_smooth = lineEqn(f, x_1, x_smooth)
+                t_smooth = line_eqn(f, x_1, x_smooth)
                 ax2.plot(x_smooth, t_smooth, 'tab:blue', zorder = 1)
 
             #plot second characteristic from (x_2, 0) to (x_shock, t_shock)
@@ -100,7 +90,7 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
                     x_smooth = np.linspace(x_2, x_shock)
                 else:
                     x_smooth = np.linspace(x_shock, x_2)
-                t_smooth = lineEqn(f, x_2, x_smooth)
+                t_smooth = line_eqn(f, x_2, x_smooth)
                 ax2.plot(x_smooth, t_smooth, 'tab:blue', zorder = 1)
             seen.extend([x_1, x_2])
         collisions = collisions[1:]
@@ -110,7 +100,7 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
             if f(x_0) == 0:
                 ax2.axvline(x_0, zorder = 1)
             else:
-                t = lineEqn(f, x_0, x_space)
+                t = line_eqn(f, x_0, x_space)
                 ax2.plot(x_space, t, 'tab:blue', zorder = 1)
     
     if len(shocks) > 1:
@@ -124,17 +114,36 @@ def main(f, left = -2, right = 2, t_max = 4, num_lines = 50):
         ax2.plot(shock_x_space, np.interp(shock_x_space, shocks[:, 0], shocks[:, 1]), color = 'red')
     
         #forward propagate initial condition until first shock
-        x_space_t = fwd_propagate(f, x_space, t_shock)
-        ax3.set_title("Shock Discontinuity (t = " + str(round(t_shock, 2)) + ")")
-        ax3.set_xlabel("x", weight = 'bold')
-        ax3.set_ylabel("u(x, t)", weight = 'bold')
-        ax3.set_xlim([left, right])
-        ax3.plot(x_space_t, f(x_space), 'red')
-
-        #todo: animation
+        if plotShockSol:
+            x_space_t = fwd_propagate(f, x_space, t_shock)
+            ax3.set_title("Shock Discontinuity (t = " + str(round(t_shock, 2)) + ")")
+            ax3.set_xlabel("x", weight = 'bold')
+            ax3.set_ylabel("u(x, t)", weight = 'bold')
+            ax3.set_xlim([left, right])
+            ax3.plot(x_space_t, f(x_space), 'red')
+    #todo: animation
     plt.show()
+    
+'''
+Initial Conditions u(x, 0) = f(x).
+'''
+def gaussian(x):
+    return np.exp(-x**2)
 
-main(f)
-main(gaussian, -4, 4, 10)
-main(np.sin, 0, 2*np.pi, 4)
-main(h, -4, 4)
+def hyper(x):
+    return np.tanh(-x)
+
+'''Evans 3.4'''
+def f_1(x):
+    '''Shock Wave'''
+    return np.piecewise(x, [x <= 0, x > 0, x > 1], [1, lambda x: 1-x, 0])
+
+def f_2(x):
+    '''Rarefaction Wave'''
+    return np.piecewise(x, [x <= 0, x > 0], [0, 1])
+    
+def f_3(x):
+    '''Shock + Rarefaction'''
+    return np.piecewise(x, [x < 0, x >= 0, x > 1], [0, 1, 0])
+
+burgers(gaussian, plotShockSol = True)
