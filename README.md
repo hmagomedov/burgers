@@ -8,7 +8,7 @@ For any initial condition `f(x) = u(x, 0)`, simply call `burgers(f)`.  The chara
 
 If `plotShockSol = True`, the initial state `f(x)` is moved forward in time along non-intersecting characteristics until the first collision is detected. This represents the last continuous solution prior to the onset of the shock discontinuity. The time of shock becomes more accurate as more characteristic lines are plotted.
 
-Specify the (x, t)-domain and other parameters as follows:
+`f` must accept array inputs. Specify the (x, t)-domain and other parameters as follows:
 
 ``burgers(f, left, right, t_max, numLines = 40, plotShockSol = True)``
 
