@@ -24,7 +24,7 @@ burgers(f_3, plotShockSol = False)
 <img src="https://github.com/hmagomedov/burgers/blob/main/Evans_3.png"/>
 
 
-This second example illustrates the shock that occures with a Gaussian initial condition. The discontinuity in the solution is apparent as it is on the verge of becoming multi-valued.
+This second example illustrates the shock that occurs with a Gaussian initial condition. The discontinuity in the solution is apparent as it is on the verge of becoming multi-valued.
 
 ```
 def gaussian(x):
