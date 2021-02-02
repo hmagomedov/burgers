@@ -1,6 +1,6 @@
 # Shock Discontinuities for Inviscid Burgers' Equation
 
-A visualization of the method of characteristics used to find continuous solutions to the Inviscid Burgers' equation: 
+A visualization of the method of characteristics for the Inviscid Burgers' equation: 
 
 `u_t + u * u_x = 0`
 
