@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def line_eqn(f, x_0, x):
-    '''Equation of characteristic line in (x, t)-space, with slope = 1 / f(x_0).'''
+    '''Characteristic equation in (x, t)-space, with slope = 1 / f(x_0).'''
     if f(x_0) == 0:
         return None
     return (x - x_0)/f(x_0)
@@ -22,6 +21,7 @@ def intersection(f, x_1, x_2):
         t_inter = line_eqn(f, x_2, x_inter)
     return [x_inter, t_inter]    
 
+
 def fwd_propagate(f, x_space, t):
     '''Moves f(x_space) along characteristic lines until time t'''
     u_0 = f(x_space)
@@ -31,7 +31,13 @@ def fwd_propagate(f, x_space, t):
         new_x_space[i] = t * f(x_i) + x_i
     return new_x_space
 
+
 def burgers(f, left = -2, right = 2, t_max = 4, numLines = 40, plotShockSol = True):
+    '''
+    Initial Condition: f(x) = u(x, 0)
+    Plots characteristic equations for solutions to the Inviscid Burgers' equation.
+    Resolves interceptions and interpolates possible discontinuities if they arise. 
+    '''
     x_space = np.linspace(left, right, 1000)
     if plotShockSol:
         fig, (ax1, ax2, ax3) = plt.subplots(3, constrained_layout = True)
@@ -146,4 +152,4 @@ def f_3(x):
     '''Shock + Rarefaction'''
     return np.piecewise(x, [x < 0, x >= 0, x > 1], [0, 1, 0])
 
-burgers(gaussian, plotShockSol = True)
+#burgers(gaussian, plotShockSol = True)
