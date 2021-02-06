@@ -151,5 +151,8 @@ def f_2(x):
 def f_3(x):
     '''Shock + Rarefaction'''
     return np.piecewise(x, [x < 0, x >= 0, x > 1], [0, 1, 0])
-
-#burgers(gaussian, plotShockSol = True)
+    
+'''
+burgers(f_3, plotShockSol = False)
+burgers(gaussian)
+'''
